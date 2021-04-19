@@ -2,7 +2,6 @@ import { addClass, append, removeClass } from "../util/dom"
 import { wrapDialog, getElementWrapper, renderPreloader, getElementDialog } from "./render"
 import { transitionAppend, transitionRemove } from "../util/transition"
 import { CLASS_NAME, LIFECYCLE_HOOKS } from "../shared/constants"
-import { countRegisterModals } from "./register"
 import { callHook } from "./lifecycle"
 import { isFunction } from "../util/type"
 import { invoke } from "../util/injector"
@@ -34,12 +33,12 @@ export function transitionAppendModal (modal)
     transitionSetContent(modal, content, false, true, asyncAfterCallback)
 }
 
-export function transitionRemoveModal (modal)
+export function transitionRemoveModal (modal, countOpenModals)
 {
     callHook(modal, LIFECYCLE_HOOKS.BEFORE_HIDE)
     transitionRemove(modal, modal._el, modal.$options.container, modal.$options.effect, () => {
         modal._resetAdjustments()
-        if (countRegisterModals() === 0)
+        if (countOpenModals == 1)
         {
             removeClass(modal.$options.overflowContainer, CLASS_NAME.OPEN)
             modal._resetScrollbar()

@@ -1,5 +1,6 @@
 import { transitionAppendModal, transitionRemoveModal } from "./transition"
 import { remove } from "../util/dom"
+import { countRegisterModals } from "./register"
 
 export function initView (modal)
 {
@@ -35,7 +36,8 @@ export function viewMixin (Modal)
         if (!modal._hasRegister() || modal._isDestroy)
             return modal
 
-        transitionRemoveModal(modal)
+        const countOpenModals = countRegisterModals()
+        transitionRemoveModal(modal, countOpenModals)
 
         modal._unregister()
         modal._isShow = false

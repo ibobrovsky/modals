@@ -1076,12 +1076,12 @@
       addClass(modal.$options.overflowContainer, CLASS_NAME.OPEN);
       transitionSetContent(modal, content, false, true, asyncAfterCallback);
     }
-    function transitionRemoveModal(modal) {
+    function transitionRemoveModal(modal, countOpenModals) {
       callHook(modal, LIFECYCLE_HOOKS.BEFORE_HIDE);
       transitionRemove(modal, modal._el, modal.$options.container, modal.$options.effect, function () {
         modal._resetAdjustments();
 
-        if (countRegisterModals() === 0) {
+        if (countOpenModals === 1) {
           removeClass(modal.$options.overflowContainer, CLASS_NAME.OPEN);
 
           modal._resetScrollbar();
@@ -1317,7 +1317,8 @@
       Modal.prototype.hide = function () {
         var modal = this;
         if (!modal._hasRegister() || modal._isDestroy) return modal;
-        transitionRemoveModal(modal);
+        var countOpenModals = countRegisterModals();
+        transitionRemoveModal(modal, countOpenModals);
 
         modal._unregister();
 
