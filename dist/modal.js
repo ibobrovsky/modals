@@ -492,6 +492,48 @@
       return container.length;
     }
 
+    function _unsupportedIterableToArray(o, minLen) {
+      if (!o) return;
+      if (typeof o === "string") return _arrayLikeToArray(o, minLen);
+      var n = Object.prototype.toString.call(o).slice(8, -1);
+      if (n === "Object" && o.constructor) n = o.constructor.name;
+      if (n === "Map" || n === "Set") return Array.from(o);
+      if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen);
+    }
+
+    function _arrayLikeToArray(arr, len) {
+      if (len == null || len > arr.length) len = arr.length;
+
+      for (var i = 0, arr2 = new Array(len); i < len; i++) arr2[i] = arr[i];
+
+      return arr2;
+    }
+
+    function _createForOfIteratorHelperLoose(o, allowArrayLike) {
+      var it;
+
+      if (typeof Symbol === "undefined" || o[Symbol.iterator] == null) {
+        if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") {
+          if (it) o = it;
+          var i = 0;
+          return function () {
+            if (i >= o.length) return {
+              done: true
+            };
+            return {
+              done: false,
+              value: o[i++]
+            };
+          };
+        }
+
+        throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
+      }
+
+      it = o[Symbol.iterator]();
+      return it.next.bind(it);
+    }
+
     function remove(element, wrapper) {
       if (isDomNode(element) && (isDomNode(element.parentNode) || isDomNode(wrapper))) {
         var wrap = isDomNode(element.parentNode) ? element.parentNode : isDomNode(wrapper) ? wrapper : null;
@@ -1081,7 +1123,7 @@
       transitionRemove(modal, modal._el, modal.$options.container, modal.$options.effect, function () {
         modal._resetAdjustments();
 
-        if (countOpenModals === 1) {
+        if (countOpenModals == 1) {
           removeClass(modal.$options.overflowContainer, CLASS_NAME.OPEN);
 
           modal._resetScrollbar();
@@ -1127,11 +1169,28 @@
       modal._el = null;
       modal._content = null;
       modal._isAsyncContent = false;
+      modal._originalNode = null;
+      modal._originalNodeChildNodes = null;
     }
     function destroyRender(modal) {
       modal._el = null;
       modal._content = null;
       modal._isAsyncContent = false;
+
+      if (modal._originalNode && modal._originalNodeChildNodes) {
+        var fragment = document.createDocumentFragment();
+
+        for (var _iterator = _createForOfIteratorHelperLoose(modal._originalNodeChildNodes), _step; !(_step = _iterator()).done;) {
+          var child = _step.value;
+          fragment.appendChild(child);
+        }
+
+        modal._originalNodeChildNodes = null;
+
+        modal._originalNode.appendChild(fragment);
+
+        modal._originalNode = null;
+      }
     }
     function renderMixin(Modal) {
       Modal.prototype._renderEl = function () {
@@ -1223,13 +1282,11 @@
       switch (typeof content) {
         case "string":
           if (content.length > 0 && document.getElementById(content)) {
-            var node = document.getElementById(content).cloneNode(true);
+            res = cloneNode(modal, document.getElementById(content));
 
-            if (hasClass(node, CLASS_NAME.HIDE)) {
-              removeClass(node, CLASS_NAME.HIDE);
+            if (hasClass(res, CLASS_NAME.HIDE)) {
+              removeClass(res, CLASS_NAME.HIDE);
             }
-
-            res = node;
           } else {
             res = content;
           }
@@ -1258,13 +1315,11 @@
 
         case "object":
           if (isDomNode(content)) {
-            var _node = content.cloneNode(true);
+            res = cloneNode(modal, content);
 
-            if (hasClass(_node, CLASS_NAME.HIDE)) {
-              removeClass(_node, CLASS_NAME.HIDE);
+            if (hasClass(res, CLASS_NAME.HIDE)) {
+              removeClass(res, CLASS_NAME.HIDE);
             }
-
-            res = _node;
           } else if (isPromise(content)) {
             modal._isAsyncContent = true;
             content.then(function (res) {
@@ -1284,6 +1339,29 @@
       }
 
       return res;
+    }
+
+    function cloneNode(modal, node) {
+      if (isDomNode(node)) {
+        modal._originalNode = node;
+
+        if (modal._originalNode.childNodes.length) {
+          modal._originalNodeChildNodes = [];
+
+          for (var _iterator2 = _createForOfIteratorHelperLoose(modal._originalNode.childNodes), _step2; !(_step2 = _iterator2()).done;) {
+            var child = _step2.value;
+
+            modal._originalNodeChildNodes.push(child);
+          }
+        }
+
+        var clone = modal._originalNode.cloneNode(true);
+
+        clean(modal._originalNode);
+        return clone;
+      }
+
+      return null;
     }
 
     function close(modal, target) {

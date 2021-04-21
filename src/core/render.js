@@ -1,5 +1,5 @@
 import { invoke } from "../util/injector"
-import {append, create, findChild, hasClass, removeClass} from '../util/dom'
+import {append, clean, create, findChild, hasClass, removeClass} from '../util/dom'
 import {isDomNode, isObject, isPromise} from '../util/type'
 import { handleError } from "../util/error"
 import { CLASS_NAME, EVENTS } from '../shared/constants'
@@ -11,6 +11,9 @@ export function initRender (modal)
     modal._el = null
     modal._content = null
     modal._isAsyncContent = false
+
+    modal._originalNode = null
+    modal._originalNodeChildNodes = null
 }
 
 export function destroyRender (modal)
@@ -18,6 +21,18 @@ export function destroyRender (modal)
     modal._el = null
     modal._content = null
     modal._isAsyncContent = false
+
+    if (modal._originalNode && modal._originalNodeChildNodes)
+    {
+        const fragment = document.createDocumentFragment()
+        for (let child of modal._originalNodeChildNodes)
+        {
+            fragment.appendChild(child)
+        }
+        modal._originalNodeChildNodes = null
+        modal._originalNode.appendChild(fragment)
+        modal._originalNode = null
+    }
 }
 
 export function renderMixin (Modal)
@@ -131,12 +146,11 @@ export function getContent (modal, content, asyncAfterCallback)
         case "string":
             if (content.length > 0 && document.getElementById(content))
             {
-                const node = document.getElementById(content).cloneNode(true)
-                if (hasClass(node, CLASS_NAME.HIDE))
+                res = cloneNode(modal, document.getElementById(content))
+                if (hasClass(res, CLASS_NAME.HIDE))
                 {
-                    removeClass(node, CLASS_NAME.HIDE)
+                    removeClass(res, CLASS_NAME.HIDE)
                 }
-                res = node
             }
             else
             {
@@ -166,12 +180,11 @@ export function getContent (modal, content, asyncAfterCallback)
         case "object":
             if (isDomNode(content))
             {
-                const node = content.cloneNode(true)
-                if (hasClass(node, CLASS_NAME.HIDE))
+                res = cloneNode(modal, content)
+                if (hasClass(res, CLASS_NAME.HIDE))
                 {
-                    removeClass(node, CLASS_NAME.HIDE)
+                    removeClass(res, CLASS_NAME.HIDE)
                 }
-                res = node
             }
             else if (isPromise(content))
             {
@@ -194,6 +207,27 @@ export function getContent (modal, content, asyncAfterCallback)
     }
 
     return res
+}
+
+function cloneNode (modal, node)
+{
+    if (isDomNode(node))
+    {
+        modal._originalNode = node
+        if (modal._originalNode.childNodes.length)
+        {
+            modal._originalNodeChildNodes = []
+            for (let child of modal._originalNode.childNodes)
+            {
+                modal._originalNodeChildNodes.push(child)
+            }
+        }
+        const clone = modal._originalNode.cloneNode(true)
+        clean(modal._originalNode)
+        return clone
+    }
+
+    return null
 }
 
 function close (modal, target)
