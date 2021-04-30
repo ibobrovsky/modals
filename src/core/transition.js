@@ -17,7 +17,7 @@ export function transitionAppendModal (modal)
     const content = modal._renderContent(asyncAfterCallback)
     if (!content && modal._isAsyncContent)
     {
-        append(renderPreloader(modal), getElementWrapper(el))
+        append(renderPreloader(modal), content)
     }
 
     callHook(modal, LIFECYCLE_HOOKS.BEFORE_SHOW)
