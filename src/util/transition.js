@@ -2,7 +2,6 @@ import { append, remove, clean, addClass, removeClass } from "./dom"
 import { inBrowser, isIE9 } from "./env"
 import { isDomNode, isFunction } from "./type"
 import { invoke } from "./injector"
-import { runScripts } from "../core/render"
 
 export function transitionAppend (
     modal,
@@ -12,7 +11,6 @@ export function transitionAppend (
     clearWrapper = true,
     useTransition = true,
     callbackAfter = null,
-    isRunScripts = true
 )
 {
     if (!isDomNode(el) || !isDomNode(wrapper))
@@ -28,10 +26,6 @@ export function transitionAppend (
     if (!effect || !useTransition)
     {
         append(el, wrapper)
-        if (isRunScripts)
-        {
-            runScripts(modal)
-        }
         if (isFunction(callbackAfter))
         {
             invoke(callbackAfter, modal)
@@ -44,10 +38,6 @@ export function transitionAppend (
     addClass(el, transitionClasses.enterClass)
     addClass(el, transitionClasses.enterActiveClass)
     append(el, wrapper)
-    if (isRunScripts)
-    {
-        runScripts(modal)
-    }
     const timeout = getTransitionTimeout(el)
 
     nextFrame(() => {

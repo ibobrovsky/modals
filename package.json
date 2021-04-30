@@ -28,6 +28,7 @@
     "rollup-plugin-terser": "^7.0.2"
   },
   "dependencies": {
-    "shared": "^0.2.0"
+    "shared": "^0.2.0",
+    "vue": "^2.6.12"
   }
 }

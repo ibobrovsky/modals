@@ -49,7 +49,7 @@ export function transitionRemoveModal (modal, countOpenModals)
     })
 }
 
-export function transitionSetContent (modal, content, isError = false, useTransition = true, callback = null, runScripts = true)
+export function transitionSetContent (modal, content, isError = false, useTransition = true, callback = null)
 {
     if (!modal._el || content === undefined)
     {
@@ -60,14 +60,14 @@ export function transitionSetContent (modal, content, isError = false, useTransi
 
     if (!!modal.$options.cacheContent && !isError)
     {
-        modal._content = content
+        modal._content = wrapDialog(content)
     }
 
-    transitionAppend(modal, wrapDialog(content), getElementWrapper(modal._el), modal.$options.contentEffect, true, useTransition, () => {
+    transitionAppend(modal, modal._content || wrapDialog(content), getElementWrapper(modal._el), modal.$options.contentEffect, true, useTransition, () => {
         callHook(modal, LIFECYCLE_HOOKS.AFTER_SET_CONTENT)
         if (isFunction(callback))
         {
             invoke(callback, modal)
         }
-    }, runScripts)
+    })
 }

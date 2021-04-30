@@ -933,7 +933,7 @@
     var UA = inBrowser && window.navigator.userAgent.toLowerCase();
     var isIE9 = UA && UA.indexOf('msie 9.0') > 0;
 
-    function transitionAppend(modal, el, wrapper, effect, clearWrapper, useTransition, callbackAfter, isRunScripts) {
+    function transitionAppend(modal, el, wrapper, effect, clearWrapper, useTransition, callbackAfter) {
       if (effect === void 0) {
         effect = '';
       }
@@ -950,10 +950,6 @@
         callbackAfter = null;
       }
 
-      if (isRunScripts === void 0) {
-        isRunScripts = true;
-      }
-
       if (!isDomNode(el) || !isDomNode(wrapper)) {
         return;
       }
@@ -964,10 +960,6 @@
 
       if (!effect || !useTransition) {
         append(el, wrapper);
-
-        if (isRunScripts) {
-          runScripts(modal);
-        }
 
         if (isFunction(callbackAfter)) {
           invoke(callbackAfter, modal);
@@ -980,11 +972,6 @@
       addClass(el, transitionClasses.enterClass);
       addClass(el, transitionClasses.enterActiveClass);
       append(el, wrapper);
-
-      if (isRunScripts) {
-        runScripts(modal);
-      }
-
       var timeout = getTransitionTimeout(el);
       nextFrame(function () {
         addClass(el, transitionClasses.enterToClass);
@@ -1146,7 +1133,7 @@
         callHook(modal, LIFECYCLE_HOOKS.AFTER_HIDE);
       });
     }
-    function transitionSetContent(modal, content, isError, useTransition, callback, runScripts) {
+    function transitionSetContent(modal, content, isError, useTransition, callback) {
       if (isError === void 0) {
         isError = false;
       }
@@ -1159,10 +1146,6 @@
         callback = null;
       }
 
-      if (runScripts === void 0) {
-        runScripts = true;
-      }
-
       if (!modal._el || content === undefined) {
         return;
       }
@@ -1170,16 +1153,16 @@
       callHook(modal, LIFECYCLE_HOOKS.BEFORE_SET_CONTENT);
 
       if (!!modal.$options.cacheContent && !isError) {
-        modal._content = content;
+        modal._content = wrapDialog(content);
       }
 
-      transitionAppend(modal, wrapDialog(content), getElementWrapper(modal._el), modal.$options.contentEffect, true, useTransition, function () {
+      transitionAppend(modal, modal._content || wrapDialog(content), getElementWrapper(modal._el), modal.$options.contentEffect, true, useTransition, function () {
         callHook(modal, LIFECYCLE_HOOKS.AFTER_SET_CONTENT);
 
         if (isFunction(callback)) {
           invoke(callback, modal);
         }
-      }, runScripts);
+      });
     }
 
     function initRender(modal) {
@@ -1252,7 +1235,7 @@
         return modal._content;
       };
 
-      Modal.prototype.setContent = function (content, isError, useTransition, runScripts) {
+      Modal.prototype.setContent = function (content, isError, useTransition) {
         if (isError === void 0) {
           isError = false;
         }
@@ -1261,13 +1244,9 @@
           useTransition = true;
         }
 
-        if (runScripts === void 0) {
-          runScripts = true;
-        }
-
         var modal = this;
         if (modal._isDestroy) return;
-        transitionSetContent(modal, getContent(modal, content), isError, useTransition, null, runScripts);
+        transitionSetContent(modal, getContent(modal, content), isError, useTransition, null);
       };
     }
     function renderPreloader(modal) {
@@ -1310,7 +1289,7 @@
               removeClass(res, CLASS_NAME.HIDE);
             }
           } else {
-            checkScripts(modal, content);
+            // checkScripts(modal, content)
             res = content;
           }
 
@@ -1362,50 +1341,50 @@
       }
 
       return res;
-    }
-
-    function checkScripts(modal, content) {
-      var elData = {};
-
-      if (isString(content)) {
-        elData = {
-          html: content
-        };
-      } else if (isDomNode(content)) {
-        elData = {
-          children: [content]
-        };
-      } else {
-        return;
-      }
-
-      var el = create('div', elData);
-      var scripts = el.querySelectorAll('script');
-
-      if (scripts.length > 0) {
-        for (var _iterator2 = _createForOfIteratorHelperLoose(scripts), _step2; !(_step2 = _iterator2()).done;) {
-          var script = _step2.value;
-
-          modal._scripts.push(new Function(script.textContent));
-        }
-      }
-    }
-
-    function runScripts(modal) {
-      if (modal._scripts.length > 0) {
-        modal._scripts.forEach(function (fn) {
-          try {
-            invoke(fn, null);
-          } catch (e) {
-            console.warn(e);
-          }
-        });
-
-        var dialog = getElementDialog(modal._el);
-        modal._content = dialog.innerHTML;
-        modal._scripts = [];
-      }
-    }
+    } // function checkScripts (modal, content)
+    // {
+    //     let elData = {}
+    //     if (isString(content))
+    //     {
+    //         elData = {html: content}
+    //     }
+    //     else if (isDomNode(content))
+    //     {
+    //         elData = {children: [content]}
+    //     }
+    //     else
+    //     {
+    //         return
+    //     }
+    //
+    //     const el = create('div', elData)
+    //
+    //     const scripts = el.querySelectorAll('script')
+    //
+    //     if (scripts.length > 0)
+    //     {
+    //         for (let script of scripts)
+    //         {
+    //             modal._scripts.push(new Function(script.textContent))
+    //         }
+    //     }
+    // }
+    // export function runScripts (modal)
+    // {
+    //     if (modal._scripts.length > 0)
+    //     {
+    //         modal._scripts.forEach(fn => {
+    //             try {
+    //                 invoke(fn, null)
+    //             } catch (e) {
+    //                 console.warn(e)
+    //             }
+    //         })
+    //         const dialog = getElementDialog(modal._el)
+    //         modal._content = dialog.innerHTML
+    //         modal._scripts = []
+    //     }
+    // }
 
     function cloneNode(modal, node) {
       if (isDomNode(node)) {
@@ -1414,8 +1393,8 @@
         if (modal._originalNode.childNodes.length) {
           modal._originalNodeChildNodes = [];
 
-          for (var _iterator3 = _createForOfIteratorHelperLoose(modal._originalNode.childNodes), _step3; !(_step3 = _iterator3()).done;) {
-            var child = _step3.value;
+          for (var _iterator2 = _createForOfIteratorHelperLoose(modal._originalNode.childNodes), _step2; !(_step2 = _iterator2()).done;) {
+            var child = _step2.value;
 
             modal._originalNodeChildNodes.push(child);
           }
