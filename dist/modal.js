@@ -1151,12 +1151,13 @@
       }
 
       callHook(modal, LIFECYCLE_HOOKS.BEFORE_SET_CONTENT);
+      content = wrapDialog(content);
 
       if (!!modal.$options.cacheContent && !isError) {
-        modal._content = wrapDialog(content);
+        modal._content = content;
       }
 
-      transitionAppend(modal, modal._content || wrapDialog(content), getElementWrapper(modal._el), modal.$options.contentEffect, true, useTransition, function () {
+      transitionAppend(modal, content, getElementWrapper(modal._el), modal.$options.contentEffect, true, useTransition, function () {
         callHook(modal, LIFECYCLE_HOOKS.AFTER_SET_CONTENT);
 
         if (isFunction(callback)) {
@@ -1171,7 +1172,6 @@
       modal._isAsyncContent = false;
       modal._originalNode = null;
       modal._originalNodeChildNodes = null;
-      modal._scripts = [];
     }
     function destroyRender(modal) {
       modal._el = null;
