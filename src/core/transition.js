@@ -17,7 +17,7 @@ export function transitionAppendModal (modal)
     const content = modal._renderContent(asyncAfterCallback)
     if (!content && modal._isAsyncContent)
     {
-        append(renderPreloader(modal), content)
+        append(renderPreloader(modal), getElementWrapper(el))
     }
 
     callHook(modal, LIFECYCLE_HOOKS.BEFORE_SHOW)
@@ -58,14 +58,12 @@ export function transitionSetContent (modal, content, isError = false, useTransi
 
     callHook(modal, LIFECYCLE_HOOKS.BEFORE_SET_CONTENT)
 
-    content = wrapDialog(content)
-
     if (!!modal.$options.cacheContent && !isError)
     {
         modal._content = content
     }
 
-    transitionAppend(modal, content, getElementWrapper(modal._el), modal.$options.contentEffect, true, useTransition, () => {
+    transitionAppend(modal, wrapDialog(content), getElementWrapper(modal._el), modal.$options.contentEffect, true, useTransition, () => {
         callHook(modal, LIFECYCLE_HOOKS.AFTER_SET_CONTENT)
         if (isFunction(callback))
         {
