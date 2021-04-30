@@ -1,6 +1,6 @@
 import { invoke } from "../util/injector"
 import {append, clean, create, findChild, hasClass, removeClass} from '../util/dom'
-import {isDomNode, isObject, isPromise} from '../util/type'
+import {isDomNode, isObject, isPromise, isString} from '../util/type'
 import { handleError } from "../util/error"
 import { CLASS_NAME, EVENTS } from '../shared/constants'
 import { transitionSetContent } from "./transition"
@@ -14,6 +14,7 @@ export function initRender (modal)
 
     modal._originalNode = null
     modal._originalNodeChildNodes = null
+    modal._scripts = []
 }
 
 export function destroyRender (modal)
@@ -89,13 +90,13 @@ export function renderMixin (Modal)
         return modal._content
     }
 
-    Modal.prototype.setContent = function (content, isError = false, useTransition = true)
+    Modal.prototype.setContent = function (content, isError = false, useTransition = true, runScripts = true)
     {
         const modal = this
         if (modal._isDestroy)
             return
 
-        transitionSetContent(modal, getContent(modal, content), isError, useTransition)
+        transitionSetContent(modal, getContent(modal, content), isError, useTransition, null, runScripts)
     }
 }
 
@@ -154,6 +155,7 @@ export function getContent (modal, content, asyncAfterCallback)
             }
             else
             {
+                checkScripts(modal, content)
                 res = content
             }
             break
@@ -207,6 +209,52 @@ export function getContent (modal, content, asyncAfterCallback)
     }
 
     return res
+}
+
+function checkScripts (modal, content)
+{
+    let elData = {}
+    if (isString(content))
+    {
+        elData = {html: content}
+    }
+    else if (isDomNode(content))
+    {
+        elData = {children: [content]}
+    }
+    else
+    {
+        return
+    }
+
+    const el = create('div', elData)
+
+    const scripts = el.querySelectorAll('script')
+
+    if (scripts.length > 0)
+    {
+        for (let script of scripts)
+        {
+            modal._scripts.push(new Function(script.textContent))
+        }
+    }
+}
+
+export function runScripts (modal)
+{
+    if (modal._scripts.length > 0)
+    {
+        modal._scripts.forEach(fn => {
+            try {
+                invoke(fn, null)
+            } catch (e) {
+                console.warn(e)
+            }
+        })
+        const dialog = getElementDialog(modal._el)
+        modal._content = dialog.innerHTML
+        modal._scripts = []
+    }
 }
 
 function cloneNode (modal, node)

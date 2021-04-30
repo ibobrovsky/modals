@@ -927,7 +927,7 @@ var inBrowser = typeof window !== 'undefined';
 var UA = inBrowser && window.navigator.userAgent.toLowerCase();
 var isIE9 = UA && UA.indexOf('msie 9.0') > 0;
 
-function transitionAppend(modal, el, wrapper, effect, clearWrapper, useTransition, callbackAfter) {
+function transitionAppend(modal, el, wrapper, effect, clearWrapper, useTransition, callbackAfter, isRunScripts) {
   if (effect === void 0) {
     effect = '';
   }
@@ -944,6 +944,10 @@ function transitionAppend(modal, el, wrapper, effect, clearWrapper, useTransitio
     callbackAfter = null;
   }
 
+  if (isRunScripts === void 0) {
+    isRunScripts = true;
+  }
+
   if (!isDomNode(el) || !isDomNode(wrapper)) {
     return;
   }
@@ -954,6 +958,10 @@ function transitionAppend(modal, el, wrapper, effect, clearWrapper, useTransitio
 
   if (!effect || !useTransition) {
     append(el, wrapper);
+
+    if (isRunScripts) {
+      runScripts(modal);
+    }
 
     if (isFunction(callbackAfter)) {
       invoke(callbackAfter, modal);
@@ -966,6 +974,11 @@ function transitionAppend(modal, el, wrapper, effect, clearWrapper, useTransitio
   addClass(el, transitionClasses.enterClass);
   addClass(el, transitionClasses.enterActiveClass);
   append(el, wrapper);
+
+  if (isRunScripts) {
+    runScripts(modal);
+  }
+
   var timeout = getTransitionTimeout(el);
   nextFrame(function () {
     addClass(el, transitionClasses.enterToClass);
@@ -1127,7 +1140,7 @@ function transitionRemoveModal(modal, countOpenModals) {
     callHook(modal, LIFECYCLE_HOOKS.AFTER_HIDE);
   });
 }
-function transitionSetContent(modal, content, isError, useTransition, callback) {
+function transitionSetContent(modal, content, isError, useTransition, callback, runScripts) {
   if (isError === void 0) {
     isError = false;
   }
@@ -1138,6 +1151,10 @@ function transitionSetContent(modal, content, isError, useTransition, callback) 
 
   if (callback === void 0) {
     callback = null;
+  }
+
+  if (runScripts === void 0) {
+    runScripts = true;
   }
 
   if (!modal._el || content === undefined) {
@@ -1156,7 +1173,7 @@ function transitionSetContent(modal, content, isError, useTransition, callback) 
     if (isFunction(callback)) {
       invoke(callback, modal);
     }
-  });
+  }, runScripts);
 }
 
 function initRender(modal) {
@@ -1165,6 +1182,7 @@ function initRender(modal) {
   modal._isAsyncContent = false;
   modal._originalNode = null;
   modal._originalNodeChildNodes = null;
+  modal._scripts = [];
 }
 function destroyRender(modal) {
   modal._el = null;
@@ -1228,7 +1246,7 @@ function renderMixin(Modal) {
     return modal._content;
   };
 
-  Modal.prototype.setContent = function (content, isError, useTransition) {
+  Modal.prototype.setContent = function (content, isError, useTransition, runScripts) {
     if (isError === void 0) {
       isError = false;
     }
@@ -1237,9 +1255,13 @@ function renderMixin(Modal) {
       useTransition = true;
     }
 
+    if (runScripts === void 0) {
+      runScripts = true;
+    }
+
     var modal = this;
     if (modal._isDestroy) return;
-    transitionSetContent(modal, getContent(modal, content), isError, useTransition);
+    transitionSetContent(modal, getContent(modal, content), isError, useTransition, null, runScripts);
   };
 }
 function renderPreloader(modal) {
@@ -1282,6 +1304,7 @@ function getContent(modal, content, asyncAfterCallback) {
           removeClass(res, CLASS_NAME.HIDE);
         }
       } else {
+        checkScripts(modal, content);
         res = content;
       }
 
@@ -1335,6 +1358,49 @@ function getContent(modal, content, asyncAfterCallback) {
   return res;
 }
 
+function checkScripts(modal, content) {
+  var elData = {};
+
+  if (isString(content)) {
+    elData = {
+      html: content
+    };
+  } else if (isDomNode(content)) {
+    elData = {
+      children: [content]
+    };
+  } else {
+    return;
+  }
+
+  var el = create('div', elData);
+  var scripts = el.querySelectorAll('script');
+
+  if (scripts.length > 0) {
+    for (var _iterator2 = _createForOfIteratorHelperLoose(scripts), _step2; !(_step2 = _iterator2()).done;) {
+      var script = _step2.value;
+
+      modal._scripts.push(new Function(script.textContent));
+    }
+  }
+}
+
+function runScripts(modal) {
+  if (modal._scripts.length > 0) {
+    modal._scripts.forEach(function (fn) {
+      try {
+        invoke(fn, null);
+      } catch (e) {
+        console.warn(e);
+      }
+    });
+
+    var dialog = getElementDialog(modal._el);
+    modal._content = dialog.innerHTML;
+    modal._scripts = [];
+  }
+}
+
 function cloneNode(modal, node) {
   if (isDomNode(node)) {
     modal._originalNode = node;
@@ -1342,8 +1408,8 @@ function cloneNode(modal, node) {
     if (modal._originalNode.childNodes.length) {
       modal._originalNodeChildNodes = [];
 
-      for (var _iterator2 = _createForOfIteratorHelperLoose(modal._originalNode.childNodes), _step2; !(_step2 = _iterator2()).done;) {
-        var child = _step2.value;
+      for (var _iterator3 = _createForOfIteratorHelperLoose(modal._originalNode.childNodes), _step3; !(_step3 = _iterator3()).done;) {
+        var child = _step3.value;
 
         modal._originalNodeChildNodes.push(child);
       }

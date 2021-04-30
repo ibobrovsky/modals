@@ -49,7 +49,7 @@ export function transitionRemoveModal (modal, countOpenModals)
     })
 }
 
-export function transitionSetContent (modal, content, isError = false, useTransition = true, callback = null)
+export function transitionSetContent (modal, content, isError = false, useTransition = true, callback = null, runScripts = true)
 {
     if (!modal._el || content === undefined)
     {
@@ -69,5 +69,5 @@ export function transitionSetContent (modal, content, isError = false, useTransi
         {
             invoke(callback, modal)
         }
-    })
+    }, runScripts)
 }
