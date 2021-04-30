@@ -3,7 +3,7 @@ import { wrapDialog, getElementWrapper, renderPreloader, getElementDialog } from
 import { transitionAppend, transitionRemove } from "../util/transition"
 import { CLASS_NAME, LIFECYCLE_HOOKS } from "../shared/constants"
 import { callHook } from "./lifecycle"
-import { isFunction } from "../util/type"
+import {isDomNode, isFunction} from "../util/type"
 import { invoke } from "../util/injector"
 
 export function transitionAppendModal (modal)
@@ -58,12 +58,17 @@ export function transitionSetContent (modal, content, isError = false, useTransi
 
     callHook(modal, LIFECYCLE_HOOKS.BEFORE_SET_CONTENT)
 
+    if (!(isDomNode(content) && content.className === CLASS_NAME.DIALOG))
+    {
+        content = wrapDialog(content)
+    }
+
     if (!!modal.$options.cacheContent && !isError)
     {
         modal._content = content
     }
 
-    transitionAppend(modal, wrapDialog(content), getElementWrapper(modal._el), modal.$options.contentEffect, true, useTransition, () => {
+    transitionAppend(modal, content, getElementWrapper(modal._el), modal.$options.contentEffect, true, useTransition, () => {
         callHook(modal, LIFECYCLE_HOOKS.AFTER_SET_CONTENT)
         if (isFunction(callback))
         {

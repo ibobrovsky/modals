@@ -1146,11 +1146,15 @@ function transitionSetContent(modal, content, isError, useTransition, callback) 
 
   callHook(modal, LIFECYCLE_HOOKS.BEFORE_SET_CONTENT);
 
+  if (!(isDomNode(content) && content.className === CLASS_NAME.DIALOG)) {
+    content = wrapDialog(content);
+  }
+
   if (!!modal.$options.cacheContent && !isError) {
     modal._content = content;
   }
 
-  transitionAppend(modal, wrapDialog(content), getElementWrapper(modal._el), modal.$options.contentEffect, true, useTransition, function () {
+  transitionAppend(modal, content, getElementWrapper(modal._el), modal.$options.contentEffect, true, useTransition, function () {
     callHook(modal, LIFECYCLE_HOOKS.AFTER_SET_CONTENT);
 
     if (isFunction(callback)) {
