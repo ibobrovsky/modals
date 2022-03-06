@@ -19,9 +19,11 @@
   &-hide {
     display: none;
   }
+
   &--overlay {
     background-color: rgba($color_overlay, .4);
   }
+
   &__container {
     display: table;
     width: 100%;
@@ -31,8 +33,21 @@
     display: table-cell;
     width: 100%;
     vertical-align: middle;
-    padding: 30px 24px;
+    padding: 24px 16px;
     text-align: center;
+    @media screen and(min-width: 576px) {
+      padding: 32px 24px;
+    }
+  }
+  &__dialog {
+    z-index: 75;
+    position: relative;
+    display: inline-block;
+    margin: 0 auto;
+    width: 100%;
+    @media screen and (min-width: 576px) {
+      max-width: 500px;
+    }
   }
   &__preloader {
     position: absolute;
@@ -46,90 +61,37 @@
     align-items: center;
     justify-content: center;
     z-index: 50;
-  }
-  &__preloader-icon {
-    width: 60px;
-    height: 60px;
     svg {
-      width: 100%;
-      height: 100%;
+      width: 60px;
+      height: 60px;
       fill: $color_white;
       path {
-        -webkit-transform-origin: 50% 50%;
-        -moz-transform-origin: 50% 50%;
-        -ms-transform-origin: 50% 50%;
-        -o-transform-origin: 50% 50%;
         transform-origin: 50% 50%;
-        -webkit-animation-timing-function: linear;
-        -moz-animation-timing-function: linear;
-        -o-animation-timing-function: linear;
         animation-timing-function: linear;
-        -webkit-animation-iteration-count: infinite;
-        -moz-animation-iteration-count: infinite;
-        -o-animation-iteration-count: infinite;
         animation-iteration-count: infinite;
-        &:nth-child(1)
-        {
-          -webkit-animation-name: rotate360;
-          -moz-animation-name: rotate360;
-          -o-animation-name: rotate360;
+        &:nth-child(1) {
           animation-name: rotate360;
-          -webkit-animation-duration: 2s;
-          -moz-animation-duration: 2s;
-          -o-animation-duration: 2s;
           animation-duration: 2s;
         }
-        &:nth-child(2)
-        {
-          -webkit-animation-name: rotate360Reverse;
-          -moz-animation-name: rotate360Reverse;
-          -o-animation-name: rotate360Reverse;
+        &:nth-child(2) {
           animation-name: rotate360Reverse;
-          -webkit-animation-duration: 1s;
-          -moz-animation-duration: 1s;
-          -o-animation-duration: 1s;
           animation-duration: 1s;
         }
-        &:nth-child(3)
-        {
-          -webkit-animation-name: rotate360;
-          -moz-animation-name: rotate360;
-          -o-animation-name: rotate360;
+        &:nth-child(3) {
           animation-name: rotate360;
-          -webkit-animation-duration: 2s;
-          -moz-animation-duration: 2s;
-          -o-animation-duration: 2s;
           animation-duration: 2s;
         }
       }
     }
   }
-  &__dialog {
-    z-index: 75;
-    position: relative;
-    display: inline-block;
-    //margin: 0 auto;
-    //width: 100%;
-  }
 }
 
-@media screen and(max-width: 568px) {
-  .#{$modal-block} {
-    &__wrapper {
-      padding-left: 16px;
-      padding-right: 16px;
-    }
-  }
-}
-
-@keyframes rotate360
-{
+@keyframes rotate360 {
   to {
     transform: rotate(360deg);
   }
 }
-@keyframes rotate360Reverse
-{
+@keyframes rotate360Reverse {
   to {
     transform: rotate(-360deg);
   }
