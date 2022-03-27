@@ -30,13 +30,12 @@ export function transitionAppend<E extends string = string>(
   nextFrame(() => {
     el.classList.add(transitionClasses.enterToClass)
     el.classList.remove(transitionClasses.enterClass)
+    setTimeout(() => {
+      el.classList.remove(transitionClasses.enterActiveClass)
+      el.classList.remove(transitionClasses.enterToClass)
+      if (cb) {
+        invoke(cb)
+      }
+    }, timeout)
   })
-
-  setTimeout(() => {
-    el.classList.remove(transitionClasses.enterActiveClass)
-    el.classList.remove(transitionClasses.enterToClass)
-    if (cb) {
-      invoke(cb)
-    }
-  }, timeout)
 }
