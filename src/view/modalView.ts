@@ -102,7 +102,7 @@ export default class ModalView extends BaseView implements ViewInterface {
     transitionAppend(this.$el, this.getContainer(), this.params.effect)
 
     if (isFirst) {
-      Scrollbar.add(this.$el)
+      Scrollbar.add(this.$el, this.params.scrollbarFixedClass)
       this.getOverflowContainer().classList.add(this.classes.open)
     }
 
@@ -121,7 +121,7 @@ export default class ModalView extends BaseView implements ViewInterface {
   hide(isLast: boolean, afterHideCb?: () => void): void {
     transitionRemove(this.$el, this.getContainer(), this.params.effect, () => {
       if (isLast) {
-        Scrollbar.remove(this.$el)
+        Scrollbar.remove(this.$el, 0, this.params.scrollbarFixedClass)
         this.getOverflowContainer().classList.remove(this.classes.open)
       }
     })

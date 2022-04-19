@@ -362,14 +362,14 @@ function transitionAppend(el, wrapper, effect, cb) {
     nextFrame(function () {
         el.classList.add(transitionClasses.enterToClass);
         el.classList.remove(transitionClasses.enterClass);
+        setTimeout(function () {
+            el.classList.remove(transitionClasses.enterActiveClass);
+            el.classList.remove(transitionClasses.enterToClass);
+            if (cb) {
+                invoke(cb);
+            }
+        }, timeout);
     });
-    setTimeout(function () {
-        el.classList.remove(transitionClasses.enterActiveClass);
-        el.classList.remove(transitionClasses.enterToClass);
-        if (cb) {
-            invoke(cb);
-        }
-    }, timeout);
 }
 
 var Scrollbar = /** @class */ (function () {
@@ -392,11 +392,12 @@ var Scrollbar = /** @class */ (function () {
         this.isBodyOverflowing = rect.left + rect.right < window.innerWidth;
         this.scrollbarWidth = Scrollbar.getScrollbarWidth();
     };
-    Scrollbar.setScrollbar = function () {
+    Scrollbar.setScrollbar = function (calssName) {
+        if (calssName === void 0) { calssName = 'fixed-content'; }
         if (!this.isBodyOverflowing) {
             return;
         }
-        var fixedElements = document.querySelectorAll('.fixed-content');
+        var fixedElements = document.querySelectorAll(".".concat(calssName));
         for (var i = 0; i < fixedElements.length; i++) {
             var element = fixedElements[i];
             var actualPadding_1 = element.style.paddingRight;
@@ -436,8 +437,9 @@ var Scrollbar = /** @class */ (function () {
         el.style.paddingLeft = '';
         el.style.paddingRight = '';
     };
-    Scrollbar.resetScrollbar = function () {
-        var fixedElements = document.querySelectorAll('.fixed-content');
+    Scrollbar.resetScrollbar = function (calssName) {
+        if (calssName === void 0) { calssName = 'fixed-content'; }
+        var fixedElements = document.querySelectorAll(".".concat(calssName));
         for (var i = 0; i < fixedElements.length; i++) {
             var element = fixedElements[i];
             var padding = this.data.get(element);
@@ -452,20 +454,21 @@ var Scrollbar = /** @class */ (function () {
             this.data.delete(document.body);
         }
     };
-    Scrollbar.add = function (el) {
+    Scrollbar.add = function (el, calssName) {
         this.count++;
         this.checkScrollbar();
-        this.setScrollbar();
+        console.log(calssName);
+        this.setScrollbar(calssName);
         this.adjustDialog(el);
         document.body.style.overflowY = 'hidden';
     };
-    Scrollbar.remove = function (el, timeout) {
+    Scrollbar.remove = function (el, timeout, calssName) {
         var _this = this;
         setTimeout(function () {
             Scrollbar.resetAdjustments(el);
             document.body.style.overflowY = '';
             if (_this.count === 1) {
-                _this.resetScrollbar();
+                _this.resetScrollbar(calssName);
             }
             _this.count--;
         }, timeout || 0);
@@ -575,7 +578,7 @@ var ModalView = /** @class */ (function (_super) {
         }
         transitionAppend(this.$el, this.getContainer(), this.params.effect);
         if (isFirst) {
-            Scrollbar.add(this.$el);
+            Scrollbar.add(this.$el, this.params.scrollbarFixedClass);
             this.getOverflowContainer().classList.add(this.classes.open);
         }
         if (!this.isShowPreloader && content) {
@@ -588,7 +591,7 @@ var ModalView = /** @class */ (function (_super) {
         var _this = this;
         transitionRemove(this.$el, this.getContainer(), this.params.effect, function () {
             if (isLast) {
-                Scrollbar.remove(_this.$el);
+                Scrollbar.remove(_this.$el, 0, _this.params.scrollbarFixedClass);
                 _this.getOverflowContainer().classList.remove(_this.classes.open);
             }
         });

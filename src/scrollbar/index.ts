@@ -31,13 +31,13 @@ export default class Scrollbar {
     this.scrollbarWidth = Scrollbar.getScrollbarWidth()
   }
 
-  private static setScrollbar(): void {
+  private static setScrollbar(calssName = 'fixed-content'): void {
     if (!this.isBodyOverflowing) {
       return
     }
 
     const fixedElements =
-      document.querySelectorAll<HTMLElement>('.fixed-content')
+      document.querySelectorAll<HTMLElement>(`.${calssName}`)
 
     for (let i = 0; i < fixedElements.length; i++) {
       const element = fixedElements[i]
@@ -95,9 +95,9 @@ export default class Scrollbar {
     el.style.paddingRight = ''
   }
 
-  private static resetScrollbar(): void {
+  private static resetScrollbar(calssName = 'fixed-content'): void {
     const fixedElements =
-      document.querySelectorAll<HTMLElement>('.fixed-content')
+      document.querySelectorAll<HTMLElement>(`.${calssName}`)
     for (let i = 0; i < fixedElements.length; i++) {
       const element = fixedElements[i]
       const padding = this.data.get(element)
@@ -114,20 +114,20 @@ export default class Scrollbar {
     }
   }
 
-  static add(el?: HTMLElement): void {
+  static add(el?: HTMLElement, calssName?: string): void {
     this.count++
     this.checkScrollbar()
-    this.setScrollbar()
+    this.setScrollbar(calssName)
     this.adjustDialog(el)
     document.body.style.overflowY = 'hidden'
   }
 
-  static remove(el?: HTMLElement, timeout?: number): void {
+  static remove(el?: HTMLElement, timeout?: number, calssName?: string): void {
     setTimeout(() => {
       Scrollbar.resetAdjustments(el)
       document.body.style.overflowY = ''
       if (this.count === 1) {
-        this.resetScrollbar()
+        this.resetScrollbar(calssName)
       }
       this.count--
     }, timeout || 0)

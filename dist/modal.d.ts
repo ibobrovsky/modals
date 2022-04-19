@@ -51,6 +51,7 @@ interface SharedParams {
   container?: HTMLElement
   overflowContainer?: 'body' | 'html'
   cacheContent?: boolean
+  scrollbarFixedClass?: string
   preloader?: string
   events?: {
     [K in keyof DialogEventsMap]?: DialogEventsMap[K]
