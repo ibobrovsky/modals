@@ -1,14 +1,15 @@
 import { Params } from '../core/wrapper'
 import { append } from '../utils/dom'
+import { Argument, addClass } from '../utils/classes'
 
 export default class Preloader {
   static create(
     params: Params['preloader'],
-    className?: string,
+    className?: Argument | Argument[],
   ): HTMLDivElement {
     const el = document.createElement('div')
     if (className) {
-      el.classList.add(className)
+      addClass(el, className)
     }
 
     if (typeof params === 'string') {

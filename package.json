@@ -1,6 +1,6 @@
 {
   "name": "modal",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "Modal JS plugin",
   "module": "dist/modal.es.js",
   "main": "dist/modal.min.js",
@@ -11,14 +11,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/bobrovsky-dev/modal.git"
+    "url": "git+https://github.com/ibobrovsky/modal.git"
   },
   "author": "Bobrovsky Igor",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/bobrovsky-dev/modal/issues"
+    "url": "https://github.com/ibobrovsky/modal/issues"
   },
-  "homepage": "https://github.com/bobrovsky-dev/modal#readme",
+  "homepage": "https://github.com/ibobrovsky/modal#readme",
   "devDependencies": {
     "@babel/cli": "^7.17.6",
     "@babel/core": "^7.17.5",

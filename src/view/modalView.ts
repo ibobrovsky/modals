@@ -6,16 +6,17 @@ import { append, clean, remove } from '../utils/dom'
 import { transitionAppend } from '../utils/transition/transitionAppend'
 import Scrollbar from '../scrollbar'
 import { transitionRemove } from '../utils/transition/transitionRemove'
+import { addClass, Argument } from '../utils/classes'
 
 type Classes = {
-  el: string
-  open: string
-  hide: string
-  overlay: string
-  container: string
-  wrapper: string
-  dialog: string
-  preloader: string
+  el: Argument | Argument[]
+  open: Argument | Argument[]
+  hide: Argument | Argument[]
+  overlay: Argument | Argument[]
+  container: Argument | Argument[]
+  wrapper: Argument | Argument[]
+  dialog: Argument | Argument[]
+  preloader: Argument | Argument[]
 }
 
 export type ModalClasses = {
@@ -61,14 +62,30 @@ export default class ModalView extends BaseView implements ViewInterface {
   protected get classes(): Classes {
     const { classes } = this.params
     return {
-      el: classes?.el || this.defaultClasses.el,
-      open: classes?.open || this.defaultClasses.open,
-      hide: classes?.hide || this.defaultClasses.hide,
-      overlay: classes?.overlay || this.defaultClasses.overlay,
-      container: classes?.container || this.defaultClasses.container,
-      wrapper: classes?.wrapper || this.defaultClasses.wrapper,
-      dialog: classes?.dialog || this.defaultClasses.dialog,
-      preloader: classes?.preloader || this.defaultClasses.preloader,
+      el: classes?.el
+        ? [this.defaultClasses.el, classes.el]
+        : this.defaultClasses.el,
+      open: classes?.open
+        ? [this.defaultClasses.open, classes.open]
+        : this.defaultClasses.open,
+      hide: classes?.hide
+        ? [this.defaultClasses.hide, classes.hide]
+        : this.defaultClasses.hide,
+      overlay: classes?.overlay
+        ? [this.defaultClasses.overlay, classes.overlay]
+        : this.defaultClasses.overlay,
+      container: classes?.container
+        ? [this.defaultClasses.container, classes.container]
+        : this.defaultClasses.container,
+      wrapper: classes?.wrapper
+        ? [this.defaultClasses.wrapper, classes.wrapper]
+        : this.defaultClasses.wrapper,
+      dialog: classes?.dialog
+        ? [this.defaultClasses.dialog, classes.dialog]
+        : this.defaultClasses.dialog,
+      preloader: classes?.preloader
+        ? [this.defaultClasses.preloader, classes.preloader]
+        : this.defaultClasses.preloader,
     }
   }
 
@@ -103,7 +120,7 @@ export default class ModalView extends BaseView implements ViewInterface {
 
     if (isFirst) {
       Scrollbar.add(this.$el, this.params.scrollbarFixedClass)
-      this.getOverflowContainer().classList.add(this.classes.open)
+      addClass(this.getOverflowContainer(), this.classes.open)
     }
 
     if (!this.isShowPreloader && content) {
@@ -122,7 +139,7 @@ export default class ModalView extends BaseView implements ViewInterface {
     transitionRemove(this.$el, this.getContainer(), this.params.effect, () => {
       if (isLast) {
         Scrollbar.remove(this.$el, 0, this.params.scrollbarFixedClass)
-        this.getOverflowContainer().classList.remove(this.classes.open)
+        addClass(this.getOverflowContainer(), this.classes.open)
       }
     })
 
@@ -140,8 +157,7 @@ export default class ModalView extends BaseView implements ViewInterface {
 
   protected wrapDialog(content: string): HTMLElement {
     const el = document.createElement('div')
-    el.classList.add(this.classes.dialog)
-
+    addClass(el, this.classes.dialog)
     append(content, el)
 
     return el
@@ -149,14 +165,14 @@ export default class ModalView extends BaseView implements ViewInterface {
 
   protected createEl(): [HTMLDivElement, HTMLDivElement] {
     const wrapper: HTMLDivElement = document.createElement('div')
-    wrapper.classList.add(this.classes.wrapper)
+    addClass(wrapper, this.classes.wrapper)
 
     const container: HTMLDivElement = document.createElement('div')
-    container.classList.add(this.classes.container)
+    addClass(container, this.classes.container)
     container.appendChild(wrapper)
 
     const el: HTMLDivElement = document.createElement('div')
-    el.classList.add(this.classes.el, this.classes.overlay)
+    addClass(el, this.classes.el, this.classes.overlay)
     el.appendChild(container)
     el.addEventListener('click', this.closeHandler.bind(this))
 

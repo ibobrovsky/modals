@@ -1,12 +1,16 @@
+export type Value = string | number | boolean | undefined | null;
+export type Mapping = { [key: string]: any };
+export type Argument = Value | Mapping | Argument[];
+
 interface ModalClasses {
-  el?: string
-  open?: string
-  hide?: string
-  overlay?: string
-  container?: string
-  wrapper?: string
-  dialog?: string
-  preloader?: string
+  el: Argument | Argument[]
+  open: Argument | Argument[]
+  hide: Argument | Argument[]
+  overlay: Argument | Argument[]
+  container: Argument | Argument[]
+  wrapper: Argument | Argument[]
+  dialog: Argument | Argument[]
+  preloader: Argument | Argument[]
 }
 
 interface DialogHookSharedParams {
