@@ -1,6 +1,6 @@
-export type Value = string | number | boolean | undefined | null;
-export type Mapping = { [key: string]: any };
-export type Argument = Value | Mapping | Argument[];
+export type Value = string | number | boolean | undefined | null
+export type Mapping = { [key: string]: any }
+export type Argument = Value | Mapping | Argument[]
 
 export function classNames(...args: Argument[]): string[] {
   var classes: string[] = []
@@ -41,4 +41,12 @@ export function addClass(el?: Element | null, ...args: Argument[]) {
   }
 
   el.classList.add(...classNames(...args))
+}
+
+export function removeClass(el?: Element | null, ...args: Argument[]) {
+  if (!el) {
+    return
+  }
+
+  el.classList.remove(...classNames(...args))
 }

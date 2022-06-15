@@ -6,7 +6,7 @@ import { append, clean, remove } from '../utils/dom'
 import { transitionAppend } from '../utils/transition/transitionAppend'
 import Scrollbar from '../scrollbar'
 import { transitionRemove } from '../utils/transition/transitionRemove'
-import { addClass, Argument } from '../utils/classes'
+import { addClass, Argument, removeClass } from '../utils/classes'
 
 type Classes = {
   el: Argument | Argument[]
@@ -139,7 +139,7 @@ export default class ModalView extends BaseView implements ViewInterface {
     transitionRemove(this.$el, this.getContainer(), this.params.effect, () => {
       if (isLast) {
         Scrollbar.remove(this.$el, 0, this.params.scrollbarFixedClass)
-        addClass(this.getOverflowContainer(), this.classes.open)
+        removeClass(this.getOverflowContainer(), this.classes.open)
       }
     })
 

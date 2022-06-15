@@ -260,13 +260,73 @@ function clean(element) {
     }
 }
 
+function classNames() {
+    var args = [];
+    for (var _i = 0; _i < arguments.length; _i++) {
+        args[_i] = arguments[_i];
+    }
+    var classes = [];
+    args.forEach(function (arg) {
+        if (!arg) {
+            return;
+        }
+        if (typeof arg === 'string' || typeof arg === 'number') {
+            classes.push(String(arg));
+        }
+        else if (Array.isArray(arg)) {
+            if (!arg.length) {
+                return;
+            }
+            var innerClasses = classNames.apply(void 0, arg);
+            if (innerClasses.length) {
+                classes.push.apply(classes, innerClasses);
+            }
+        }
+        else if (typeof arg === 'object') {
+            if (arg.toString === Object.prototype.toString) {
+                for (var key in arg) {
+                    if (Object.hasOwnProperty.call(arg, key) && arg[key]) {
+                        classes.push(key);
+                    }
+                }
+            }
+            else {
+                classes.push(arg.toString());
+            }
+        }
+    });
+    return classes;
+}
+function addClass(el) {
+    var _a;
+    var args = [];
+    for (var _i = 1; _i < arguments.length; _i++) {
+        args[_i - 1] = arguments[_i];
+    }
+    if (!el) {
+        return;
+    }
+    (_a = el.classList).add.apply(_a, classNames.apply(void 0, args));
+}
+function removeClass(el) {
+    var _a;
+    var args = [];
+    for (var _i = 1; _i < arguments.length; _i++) {
+        args[_i - 1] = arguments[_i];
+    }
+    if (!el) {
+        return;
+    }
+    (_a = el.classList).remove.apply(_a, classNames.apply(void 0, args));
+}
+
 var Preloader = /** @class */ (function () {
     function Preloader() {
     }
     Preloader.create = function (params, className) {
         var el = document.createElement('div');
         if (className) {
-            el.classList.add(className);
+            addClass(el, className);
         }
         if (typeof params === 'string') {
             append(params, el);
@@ -457,7 +517,6 @@ var Scrollbar = /** @class */ (function () {
     Scrollbar.add = function (el, calssName) {
         this.count++;
         this.checkScrollbar();
-        console.log(calssName);
         this.setScrollbar(calssName);
         this.adjustDialog(el);
         document.body.style.overflowY = 'hidden';
@@ -542,14 +601,30 @@ var ModalView = /** @class */ (function (_super) {
         get: function () {
             var classes = this.params.classes;
             return {
-                el: (classes === null || classes === void 0 ? void 0 : classes.el) || this.defaultClasses.el,
-                open: (classes === null || classes === void 0 ? void 0 : classes.open) || this.defaultClasses.open,
-                hide: (classes === null || classes === void 0 ? void 0 : classes.hide) || this.defaultClasses.hide,
-                overlay: (classes === null || classes === void 0 ? void 0 : classes.overlay) || this.defaultClasses.overlay,
-                container: (classes === null || classes === void 0 ? void 0 : classes.container) || this.defaultClasses.container,
-                wrapper: (classes === null || classes === void 0 ? void 0 : classes.wrapper) || this.defaultClasses.wrapper,
-                dialog: (classes === null || classes === void 0 ? void 0 : classes.dialog) || this.defaultClasses.dialog,
-                preloader: (classes === null || classes === void 0 ? void 0 : classes.preloader) || this.defaultClasses.preloader,
+                el: (classes === null || classes === void 0 ? void 0 : classes.el)
+                    ? [this.defaultClasses.el, classes.el]
+                    : this.defaultClasses.el,
+                open: (classes === null || classes === void 0 ? void 0 : classes.open)
+                    ? [this.defaultClasses.open, classes.open]
+                    : this.defaultClasses.open,
+                hide: (classes === null || classes === void 0 ? void 0 : classes.hide)
+                    ? [this.defaultClasses.hide, classes.hide]
+                    : this.defaultClasses.hide,
+                overlay: (classes === null || classes === void 0 ? void 0 : classes.overlay)
+                    ? [this.defaultClasses.overlay, classes.overlay]
+                    : this.defaultClasses.overlay,
+                container: (classes === null || classes === void 0 ? void 0 : classes.container)
+                    ? [this.defaultClasses.container, classes.container]
+                    : this.defaultClasses.container,
+                wrapper: (classes === null || classes === void 0 ? void 0 : classes.wrapper)
+                    ? [this.defaultClasses.wrapper, classes.wrapper]
+                    : this.defaultClasses.wrapper,
+                dialog: (classes === null || classes === void 0 ? void 0 : classes.dialog)
+                    ? [this.defaultClasses.dialog, classes.dialog]
+                    : this.defaultClasses.dialog,
+                preloader: (classes === null || classes === void 0 ? void 0 : classes.preloader)
+                    ? [this.defaultClasses.preloader, classes.preloader]
+                    : this.defaultClasses.preloader,
             };
         },
         enumerable: false,
@@ -579,7 +654,7 @@ var ModalView = /** @class */ (function (_super) {
         transitionAppend(this.$el, this.getContainer(), this.params.effect);
         if (isFirst) {
             Scrollbar.add(this.$el, this.params.scrollbarFixedClass);
-            this.getOverflowContainer().classList.add(this.classes.open);
+            addClass(this.getOverflowContainer(), this.classes.open);
         }
         if (!this.isShowPreloader && content) {
             clean(this.$wrapper);
@@ -592,7 +667,7 @@ var ModalView = /** @class */ (function (_super) {
         transitionRemove(this.$el, this.getContainer(), this.params.effect, function () {
             if (isLast) {
                 Scrollbar.remove(_this.$el, 0, _this.params.scrollbarFixedClass);
-                _this.getOverflowContainer().classList.remove(_this.classes.open);
+                removeClass(_this.getOverflowContainer(), _this.classes.open);
             }
         });
         transitionRemove(this.$dialog, this.$wrapper, this.params.contentEffect, afterHideCb);
@@ -602,18 +677,18 @@ var ModalView = /** @class */ (function (_super) {
     };
     ModalView.prototype.wrapDialog = function (content) {
         var el = document.createElement('div');
-        el.classList.add(this.classes.dialog);
+        addClass(el, this.classes.dialog);
         append(content, el);
         return el;
     };
     ModalView.prototype.createEl = function () {
         var wrapper = document.createElement('div');
-        wrapper.classList.add(this.classes.wrapper);
+        addClass(wrapper, this.classes.wrapper);
         var container = document.createElement('div');
-        container.classList.add(this.classes.container);
+        addClass(container, this.classes.container);
         container.appendChild(wrapper);
         var el = document.createElement('div');
-        el.classList.add(this.classes.el, this.classes.overlay);
+        addClass(el, this.classes.el, this.classes.overlay);
         el.appendChild(container);
         el.addEventListener('click', this.closeHandler.bind(this));
         return [el, wrapper];
