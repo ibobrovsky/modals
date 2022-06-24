@@ -1,6 +1,6 @@
-export type Value = string | number | boolean | undefined | null;
-export type Mapping = { [key: string]: any };
-export type Argument = Value | Mapping | Argument[];
+export type Value = string | number | boolean | undefined | null
+export type Mapping = { [key: string]: any }
+export type Argument = Value | Mapping | Argument[]
 
 interface ModalClasses {
   el: Argument | Argument[]
@@ -51,10 +51,16 @@ export type DialogEventsMap = {
   >
 }
 
+interface Scrollbar {
+  add(el?: HTMLElement | null): void
+  remove(el?: HTMLElement | null): void
+}
+
 interface SharedParams {
   container?: HTMLElement
   overflowContainer?: 'body' | 'html'
   cacheContent?: boolean
+  scrollbar?: Scrollbar
   scrollbarFixedClass?: string
   preloader?: string
   events?: {

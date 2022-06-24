@@ -659,7 +659,12 @@
             }
             transitionAppend(this.$el, this.getContainer(), this.params.effect);
             if (isFirst) {
-                Scrollbar.add(this.$el, this.params.scrollbarFixedClass);
+                if (this.params.scrollbar) {
+                    this.params.scrollbar.add(this.$el);
+                }
+                else {
+                    Scrollbar.add(this.$el, this.params.scrollbarFixedClass);
+                }
                 addClass(this.getOverflowContainer(), this.classes.open);
             }
             if (!this.isShowPreloader && content) {
@@ -672,7 +677,12 @@
             var _this = this;
             transitionRemove(this.$el, this.getContainer(), this.params.effect, function () {
                 if (isLast) {
-                    Scrollbar.remove(_this.$el, 0, _this.params.scrollbarFixedClass);
+                    if (_this.params.scrollbar) {
+                        _this.params.scrollbar.remove(_this.$el);
+                    }
+                    else {
+                        Scrollbar.remove(_this.$el, 0, _this.params.scrollbarFixedClass);
+                    }
                     removeClass(_this.getOverflowContainer(), _this.classes.open);
                 }
             });

@@ -6,6 +6,7 @@ import {
   ModalViewContentEffect,
   ModalViewEffect,
 } from '../view/modalView'
+import Scrollbar from '../scrollbar'
 
 let uid = 0
 
@@ -14,6 +15,7 @@ interface SharedParams {
   overflowContainer?: 'body' | 'html'
   cacheContent?: boolean
   preloader?: string
+  scrollbar?: typeof Scrollbar
   scrollbarFixedClass?: string
   events?: {
     [K in keyof DialogEventsMap]?: DialogEventsMap[K]

@@ -36,8 +36,9 @@ export default class Scrollbar {
       return
     }
 
-    const fixedElements =
-      document.querySelectorAll<HTMLElement>(`.${calssName}`)
+    const fixedElements = document.querySelectorAll<HTMLElement>(
+      `.${calssName}`,
+    )
 
     for (let i = 0; i < fixedElements.length; i++) {
       const element = fixedElements[i]
@@ -60,7 +61,7 @@ export default class Scrollbar {
     }px`
   }
 
-  private static adjustDialog(el?: HTMLElement): void {
+  private static adjustDialog(el?: HTMLElement | null): void {
     if (!el) return
 
     const isModalOverflowing =
@@ -88,7 +89,7 @@ export default class Scrollbar {
     }
   }
 
-  private static resetAdjustments(el?: HTMLElement): void {
+  private static resetAdjustments(el?: HTMLElement | null): void {
     if (!el) return
 
     el.style.paddingLeft = ''
@@ -96,8 +97,9 @@ export default class Scrollbar {
   }
 
   private static resetScrollbar(calssName = 'fixed-content'): void {
-    const fixedElements =
-      document.querySelectorAll<HTMLElement>(`.${calssName}`)
+    const fixedElements = document.querySelectorAll<HTMLElement>(
+      `.${calssName}`,
+    )
     for (let i = 0; i < fixedElements.length; i++) {
       const element = fixedElements[i]
       const padding = this.data.get(element)
@@ -114,7 +116,7 @@ export default class Scrollbar {
     }
   }
 
-  static add(el?: HTMLElement, calssName?: string): void {
+  static add(el?: HTMLElement | null, calssName?: string): void {
     this.count++
     this.checkScrollbar()
     this.setScrollbar(calssName)
@@ -122,7 +124,11 @@ export default class Scrollbar {
     document.body.style.overflowY = 'hidden'
   }
 
-  static remove(el?: HTMLElement, timeout?: number, calssName?: string): void {
+  static remove(
+    el?: HTMLElement | null,
+    timeout?: number,
+    calssName?: string,
+  ): void {
     setTimeout(() => {
       Scrollbar.resetAdjustments(el)
       document.body.style.overflowY = ''
