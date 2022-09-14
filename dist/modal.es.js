@@ -403,9 +403,12 @@ function nextFrame(fn) {
     });
 }
 
-function transitionAppend(el, wrapper, effect, cb) {
+function transitionAppend(el, wrapper, effect, cb, cb2) {
     if (!effect || typeof el === 'string') {
         append(el, wrapper);
+        if (cb2) {
+            invoke(cb2);
+        }
         if (cb) {
             invoke(cb);
         }
@@ -417,6 +420,9 @@ function transitionAppend(el, wrapper, effect, cb) {
     var isAppend = append(el, wrapper);
     if (!isAppend) {
         return;
+    }
+    if (cb2) {
+        invoke(cb2);
     }
     var timeout = getTransitionTimeout(el);
     nextFrame(function () {
@@ -452,12 +458,12 @@ var Scrollbar = /** @class */ (function () {
         this.isBodyOverflowing = rect.left + rect.right < window.innerWidth;
         this.scrollbarWidth = Scrollbar.getScrollbarWidth();
     };
-    Scrollbar.setScrollbar = function (calssName) {
-        if (calssName === void 0) { calssName = 'fixed-content'; }
+    Scrollbar.setScrollbar = function (className) {
+        if (className === void 0) { className = 'fixed-content'; }
         if (!this.isBodyOverflowing) {
             return;
         }
-        var fixedElements = document.querySelectorAll(".".concat(calssName));
+        var fixedElements = document.querySelectorAll(".".concat(className));
         for (var i = 0; i < fixedElements.length; i++) {
             var element = fixedElements[i];
             var actualPadding_1 = element.style.paddingRight;
@@ -630,7 +636,7 @@ var ModalView = /** @class */ (function (_super) {
         enumerable: false,
         configurable: true
     });
-    ModalView.prototype.show = function (isFirst, afterShowCb) {
+    ModalView.prototype.show = function (isFirst, afterShowCb, afterShowSetContentCb) {
         var _this = this;
         var getContent = function () {
             var content = _this.getContent();
@@ -642,7 +648,7 @@ var ModalView = /** @class */ (function (_super) {
             }
             _this.isShowPreloader = true;
             content.then(function (str) {
-                _this.setContent(str, afterShowCb);
+                _this.setContent(str, afterShowCb, afterShowSetContentCb);
             });
         };
         var content = this.params.cacheContent && this.$content ? this.$content : getContent();
@@ -664,7 +670,7 @@ var ModalView = /** @class */ (function (_super) {
         if (!this.isShowPreloader && content) {
             clean(this.$wrapper);
             this.$dialog = this.wrapDialog(content);
-            transitionAppend(this.$dialog, this.$wrapper, this.params.contentEffect, afterShowCb);
+            transitionAppend(this.$dialog, this.$wrapper, this.params.contentEffect, afterShowCb, afterShowSetContentCb);
         }
     };
     ModalView.prototype.hide = function (isLast, afterHideCb) {
@@ -722,7 +728,7 @@ var ModalView = /** @class */ (function (_super) {
             this.$emit('close');
         }
     };
-    ModalView.prototype.setContent = function (content, cb) {
+    ModalView.prototype.setContent = function (content, cb, cb2) {
         if (this.params.cacheContent) {
             this.$content = content;
         }
@@ -732,7 +738,7 @@ var ModalView = /** @class */ (function (_super) {
         this.isShowPreloader = false;
         clean(this.$wrapper);
         this.$dialog = this.wrapDialog(content);
-        transitionAppend(this.$dialog, this.$wrapper, this.params.contentEffect, cb);
+        transitionAppend(this.$dialog, this.$wrapper, this.params.contentEffect, cb, cb2);
     };
     return ModalView;
 }(BaseView));
@@ -811,6 +817,8 @@ var Dialog = /** @class */ (function (_super) {
         registry.set(this.uid);
         this.view.show(registry.length === 1, function () {
             _this.callHook('afterShow', {});
+        }, function () {
+            _this.callHook('setContent', {});
         });
     };
     Dialog.prototype.hide = function () {

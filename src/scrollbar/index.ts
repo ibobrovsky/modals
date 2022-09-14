@@ -31,13 +31,13 @@ export default class Scrollbar {
     this.scrollbarWidth = Scrollbar.getScrollbarWidth()
   }
 
-  private static setScrollbar(calssName = 'fixed-content'): void {
+  private static setScrollbar(className = 'fixed-content'): void {
     if (!this.isBodyOverflowing) {
       return
     }
 
     const fixedElements = document.querySelectorAll<HTMLElement>(
-      `.${calssName}`,
+      `.${className}`,
     )
 
     for (let i = 0; i < fixedElements.length; i++) {

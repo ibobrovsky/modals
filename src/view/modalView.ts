@@ -89,7 +89,11 @@ export default class ModalView extends BaseView implements ViewInterface {
     }
   }
 
-  show(isFirst: boolean, afterShowCb?: () => void): void {
+  show(
+    isFirst: boolean,
+    afterShowCb?: () => void,
+    afterShowSetContentCb?: () => void,
+  ): void {
     const getContent = (): string | void => {
       const content = this.getContent()
       if (typeof content === 'string') {
@@ -100,7 +104,7 @@ export default class ModalView extends BaseView implements ViewInterface {
       }
       this.isShowPreloader = true
       content.then((str) => {
-        this.setContent(str, afterShowCb)
+        this.setContent(str, afterShowCb, afterShowSetContentCb)
       })
     }
 
@@ -135,6 +139,7 @@ export default class ModalView extends BaseView implements ViewInterface {
         this.$wrapper,
         this.params.contentEffect,
         afterShowCb,
+        afterShowSetContentCb,
       )
     }
   }
@@ -207,7 +212,11 @@ export default class ModalView extends BaseView implements ViewInterface {
     }
   }
 
-  protected setContent(content: string, cb?: () => void): void {
+  protected setContent(
+    content: string,
+    cb?: () => void,
+    cb2?: () => void,
+  ): void {
     if (this.params.cacheContent) {
       this.$content = content
     }
@@ -219,6 +228,12 @@ export default class ModalView extends BaseView implements ViewInterface {
 
     clean(this.$wrapper)
     this.$dialog = this.wrapDialog(content)
-    transitionAppend(this.$dialog, this.$wrapper, this.params.contentEffect, cb)
+    transitionAppend(
+      this.$dialog,
+      this.$wrapper,
+      this.params.contentEffect,
+      cb,
+      cb2,
+    )
   }
 }

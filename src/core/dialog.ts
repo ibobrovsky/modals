@@ -29,6 +29,8 @@ interface DialogHookAfterHideParams {}
 
 interface DialogHookDestroyedParams {}
 
+interface DialogHookSetContentParams {}
+
 type DialogEventCallback<T> = (params: T & DialogHookSharedParams) => void
 
 interface DialogEventsMapParams {
@@ -38,6 +40,7 @@ interface DialogEventsMapParams {
   beforeHide: DialogHookBeforeHideParams
   afterHide: DialogHookAfterHideParams
   destroyed: DialogHookDestroyedParams
+  setContent: DialogHookSetContentParams
 }
 
 export type DialogEventsMap = {
@@ -156,9 +159,15 @@ export default class Dialog extends Events implements ModalDialog {
     this.isShowed = true
     registry.set(this.uid)
 
-    this.view.show(registry.length === 1, () => {
-      this.callHook('afterShow', {})
-    })
+    this.view.show(
+      registry.length === 1,
+      () => {
+        this.callHook('afterShow', {})
+      },
+      () => {
+        this.callHook('setContent', {})
+      },
+    )
   }
 
   hide(): void {

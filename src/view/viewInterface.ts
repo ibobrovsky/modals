@@ -3,7 +3,7 @@ import { ModalEventCallback } from '../core/events'
 export type ViewHook = 'close'
 
 export interface ViewInterface {
-  show(isFirst: boolean, cb?: () => void): void
+  show(isFirst: boolean, cb?: () => void, cb2?: () => void): void
   hide(isLast: boolean, cb?: () => void): void
   remove(): void
   $on(event: ViewHook | ViewHook[], callback: ModalEventCallback): void

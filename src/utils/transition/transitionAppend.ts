@@ -9,9 +9,13 @@ export function transitionAppend<E extends string = string>(
   wrapper?: Element,
   effect?: E,
   cb?: () => void,
+  cb2?: () => void,
 ): void {
   if (!effect || typeof el === 'string') {
     append(el, wrapper)
+    if (cb2) {
+      invoke(cb2)
+    }
     if (cb) {
       invoke(cb)
     }
@@ -25,6 +29,10 @@ export function transitionAppend<E extends string = string>(
   if (!isAppend) {
     return
   }
+  if (cb2) {
+    invoke(cb2)
+  }
+
   const timeout = getTransitionTimeout(el)
 
   nextFrame(() => {
